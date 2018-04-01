@@ -1,0 +1,3 @@
+
+RewriteEngine On
+RewriteRule ^([A-Za-z0-9-_]+).md$ index.php?a=md&f=$1  [L,QSA]
