@@ -9,3 +9,16 @@ Open and edit the `config.php` inside the `/assets/` folder. Change the variable
 ```
 $config['files'] = 'https://raw.githubusercontent.com/ctkjose/gitpages/master/docs/';
 ```
+
+To access a page just point your browser to the URL where you install gitpages and add the name of the markdown file like this:
+
+```php
+http://example.com/gitpages/README.md
+```
+
+
+### Costumize GitPages ###
+
+You can edit the default `template.html` found in the `/assets/` folder. You may also want to play with the `site.css```.
+
+Source code highlighting is done with prism.js, for more info go ahead and check [Prism](http://prismjs.com/index.html) out.
