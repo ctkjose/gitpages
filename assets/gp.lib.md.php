@@ -55,7 +55,7 @@ class gpMarkdown {
 		$this->text = preg_replace("/__(" . wrxw . ")__/", "<strong>$1</strong>", $this->text);
 		$this->text = preg_replace("/\*\*(" . wrxw . ")\*\*/", "<strong>$1</strong>", $this->text);
 		$this->text = preg_replace("/\*(" . wrxw . ")\*/", "<i>$1</i>", $this->text);
-		$this->text = preg_replace("/_(" . wrxw . ")_/", "<i>$1</i>", $this->text);
+		$this->text = preg_replace("/(\s)_(" . wrxw . ")_([\s\.\:\;]+)/", "$1<i>$2</i>$3", $this->text);
 
 		//$this->text = preg_replace("/```(" . rx_st . ")```/", "<code>$1</code>", $this->text);
 		//$this->text = preg_replace('/\=\= (.*) \=\=\n/', "<h2>$1</h2>\n", $this->text);
@@ -73,57 +73,84 @@ class gpMarkdown {
 		$out = '';
 		$tdc = -1;
 		$trc = -1;
-		$tb = -1;
+		$tb = 0;
 		$tbed = -1;
+		$hline = '';
 		foreach($lines as $idx => $l){
 			$s = trim($l);
-			//print "<b>{$idx}</b> " . htmlentities($s) . "<br>";
-			if(substr($s,0,2) != "||"){
-				if($tb){
-					$tb = false; $tdc = -1; $tdr=-1;
+			error_log( "{$idx}" . $s);
+			if(($tb==1) && preg_match("/^\\|((\s?\:?\-+\:?\s?\\|)+)/", $s)){
+				error_log("has col divisions...");
+				$out.= "<table class='md-table' border='0' cellspacing='0'>";
+				$tb=2;
+
+				$cols = explode('|',$hline);
+				$c = count($cols) - 2;
+
+				error_log(print_r($cols, true));
+
+				if($c < 1){
+					$tb = 0; $tdc = -1; $tdr=-1;
 					$out.= "</table>";
+					$out.= $l . "\n";
+				}else{
+					$tr = '<tr>';
+					for($i = 1; $i<=$c;$i++){
+						$css = ($i == $c) ? 'class=\"last2\"' : '';
+						$tr.= "<th {$css}>" . $cols[$i] . "</th>";
+					}
+					$tr.= "</tr>";
+					$out.= $tr . "\n";
 				}
-				$out.= $l . "\n";
+
 				continue;
 			}
 
-			$cols = explode('||',$s);
-			$c = count($cols) - 2;
-			//print "c={$c}=" . count($cols) . "<br>";
-			if($c < 1){
-				if($tb){
-					$tb = false; $tdc = -1; $tdr=-1;
+			if(($tb==2)){
+				if((substr($s,0,2) == "| ") && (substr($s,-2,2) == " |")) {
+
+					$cols = explode('|',$s);
+					$c = count($cols) - 2;
+					$tr = '<tr>';
+					for($i = 1; $i<=$c;$i++){
+						$css = ($i == $c) ? 'class=\"last2\"' : '';
+						$tr.= "<td {$css}>" . $cols[$i] . "</td>";
+					}
+					$tr.= "</tr>";
+					$out.= $tr . "\n";
+
+				}else{
+					$tb = 0; $tdc = -1; $tdr=-1;
 					$out.= "</table>";
+					$out.= $l . "\n";
 				}
+				continue;
+			}
+			if( ($tb==0) && (substr($s,0,2) == "| ")){
+				$hline = $s;
+				$tb=1;
+				continue;
+			}elseif( ($tb==0) && (substr($s,0,5) == "&gt; ")){
+				error_log("found blockquote");
+				$tb=10;
+				$hline = substr($s,5) . "<br>";
+			}elseif( $tb==10){
+				if((substr($s,0,5) == "&gt; ")){
+					$hline.= substr($s,5) . "<br>";
+				}else{
+					$out.= "<blockquote><p>" . $hline . '</p></blockquote>';
+					$out.= $l . "\n";
+					$tb=0;
+				}
+			}else{
 				$out.= $l . "\n";
 				continue;
 			}
-			if(!$tb){
-				$out.= "<table class='wiki_table' border='0' cellspacing='0'>";
-				$tb = true;
-				$tdc = $c;
-				$tdr=-1;
-			}
-
-			if($tb && ($c != $tdc)){
-				$out.= "</table>";
-				$out.= "<table class='wiki_table' border='0' cellspacing='0'>";
-				$tdr=-1;
-				$tdc = $c;
-			}
-			$tdr++;
-			$tdc = $c;
-			$tr = '<tr>';
-			for($i = 1; $i<=$c;$i++){
-				$css = ($i == $c) ? 'class=\"last\"' : '';
-				$tr.= "<td {$css}>" . $cols[$i] . "</td>";
-			}
-			$tr.= "</tr>";
-
-			$out.= $tr;
-
 		}
 
+		if($tb==2){
+			$out.= "</table>\n";
+		}
 		$this->text = $out;
 	}
 	function convert_inlinelinks(){
@@ -131,18 +158,18 @@ class gpMarkdown {
 		$ru = "https?:\/\/[\w*:\w*\@]?[\-\w.]+[:\d+]?[\/[[\w\/_\-.]*[\?\S+]?]?]?";
 		//$ru = "https?://(\w*:\w*\@)?[-\w.]+(:\d+)?(\/([\w\/_.]*(\?\S+)?)?)?";
 		//$ru = ".*";
-		$rg = "/(\[({$ru})(\s([A-Z|a-z|0-9|\.|\-|\_| |'|\?|\!|@|\#|\$|\%|\^|\&|\*|\(|\)]*))?\])/xs";
+		$rg = "/\[([^\]]*)]\(([^\)]*)\)/s";
 		$ok = preg_match_all($rg, $this->text, $m);
 
 		//print_r($m);
 		if(count($m) < 0) return;
 		$idx = -1;
-		foreach($m[1] as $idx => $sf){
+		foreach($m[0] as $idx => $sf){
 			//$sf = $m[0][$idx];
-			$st = $m[4][$idx];
+			$st = $m[1][$idx];
 			$su = $m[2][$idx];
 			if(strlen($st) <= 0) $st = $su;
-			$lnk = "<a class='wiki_link' href='{$su}'>{$st}</a>";
+			$lnk = "<a class='md-link' href='{$su}'>{$st}</a>";
 
 			$this->text = str_replace($sf, $lnk, $this->text);
 		}
@@ -189,13 +216,14 @@ class gpMarkdown {
 		$sz = strlen($d1);
 		$p1 = strpos($this->text, $d1);
 		$tag = 'pre';
+
 		if(strpos($d2,"\n") === false) $tag ='code';
 		while($p1 !== false){
 
 			$p2 = strpos($this->text, $d2, $p1 + $sz);
 			if($p2 === false) break;
 
-			$i++;
+
 			$l = ($p2 - $sz) - ($p1);
 			$code = substr($this->text, $p1 + $sz, $l);
 
@@ -206,23 +234,15 @@ class gpMarkdown {
 			}
 
 			$code = htmlentities($code);
-
-			//$code = highlight_string($code, true);
-
 			$code = "<{$tag} class='md-code md-code-{$type}  language-{$type}'>" . $code . "</{$tag}>\n";
 
-			$k = $type . $i;
+			$k = $type . ++$i;
 			$this->blocks[$k] = $code;
-			//print $k . '=' . $code;
-			//$code = str_replace("\n", "<br>\n", $code);
-
-			//print "code($p1, $p2, $l)=[$code]\n";
+			$type = 'clike';
 
 			$this->text = substr($this->text,0,$p1) . '%' . $k . '%' . substr($this->text, $p2+4);
 			$p1 = strpos($this->text, $d1);
 
-
-			//break;
 		}
 
 	}

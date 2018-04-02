@@ -2,7 +2,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
-	<title>{{page.title}}</title>
+	<title>{{file}}</title>
 	<meta name="author" content="Jose Cuevas" />
 
 	<link rel="stylesheet" href="./assets/syntax.css" type="text/css" />
@@ -16,8 +16,7 @@
 
 <div class="site">
   <div class="title">
-    <a href="/">Tom Preston-Werner</a>
-    <a class="extra" href="/">home</a>
+    <a href="/"><i class="fa fa-gears"></i> ExponentialWorks</a>
   </div>
 
   {{content}}
@@ -25,7 +24,7 @@
   <div class="footer">
     <div class="contact">
       <p>
-        Jose Cuevas
+        Jose L Cuevas
         <br />
       </p>
     </div>
@@ -67,8 +66,6 @@ Prism.languages.xojo={comment:{pattern:/(?:'|\/\/|Rem\b).+/i,inside:{keyword:/^R
 <script type="text/javascript">
 
 window.addEventListener("load", function(event) {
-	console.log("@load---------------");
-
 	var selector = 'pre[class*="language-"], code[class*="language-"], [class*="language-"] code, code[class*="lang-"], [class*="lang-"] code'
 
 	var elements = document.querySelectorAll(selector);

@@ -78,6 +78,34 @@
 	font-size: 13px;
 	color: #666;
 }
+.md-content .md-link {
+
+}
+.md-content table th {
+	font-weight: 600;
+}
+
+.md-content  table th, .md-content table td {
+	padding: 6px 13px;
+	border: 1px solid #dfe2e5
+}
+.md-content table tr {
+	background-color: #fff;
+	border-top: 1px solid #c6cbd1
+}
+
+.md-content table tr:nth-child(2n) {
+	background-color: #f6f8fa
+}
+
+.md-content table img {
+	background-color: transparent
+}
+.md-content blockquote {
+	padding: 0 1em;
+	color: #6a737d;
+	border-left: 0.25em solid #dfe2e5
+}
 
 .wiki_body {
 	font-size: 12px;

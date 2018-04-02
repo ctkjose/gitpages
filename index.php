@@ -9,6 +9,9 @@
 
 require_once(__DIR__ . '/assets/gp.lib.md.php');
 
+
+
+
 $config = [];
 include_once(__DIR__ . '/assets/config.php');
 
@@ -23,6 +26,10 @@ if($action == 'md'){
 function gpServerMD($file){
 	global $config;
 	$url = $config['files'] . $file . '.md';
+
+	if( strpos($url, 'http') !== 0 ){
+		
+	}
 	$src = file_get_contents($url);
 
 	$md = new gpMarkdown();
@@ -30,6 +37,7 @@ function gpServerMD($file){
 
 	$src = file_get_contents(__DIR__ . '/assets/template.html');
 
+	$src = str_replace('{{file}}', $file, $src);
 	$src = str_replace('{{repo}}', $config['repo'], $src);
 	$src = str_replace('{{content}}', '<div class="content md-content">' . $md->text . '</div>', $src);
 
