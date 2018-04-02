@@ -1,8 +1,8 @@
 ## Markdown Butler ##
 
-This is a small php utility to serve markdown pages directly from a GitHub repository or local folder.
+This is a small php utility to serve markdown pages directly from a GitHub repository or local folder in your web server.
 
-To install just place the `/assets/` folder, the `.htaccess` file and the `index.php` file to a folder or document root in your web server.
+To install just copy the `/assets/` folder, the `.htaccess` file and the `index.php` file to your web server.
 
 Open and edit the `config.php` inside the `/assets/` folder. Change the variable `$config['files']` to point to a url like this:
 
@@ -46,3 +46,5 @@ Today we have support for:
 
 	Blockquote with >
 ```
+
+Currently working on lists and images.
